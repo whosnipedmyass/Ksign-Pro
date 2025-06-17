@@ -1,0 +1,163 @@
+//
+//  FeatherApp.swift
+//  Feather
+//
+//  Created by samara on 10.04.2025.
+//
+
+import SwiftUI
+import Nuke
+
+@main
+struct FeatherApp: App {
+	@UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+	#if IDEVICE
+	let heartbeat = HeartbeatManager.shared
+	#endif
+	@StateObject var downloadManager = DownloadManager.shared
+	let storage = Storage.shared
+
+	var body: some Scene {
+		WindowGroup {
+			VStack {
+				DownloadHeaderView(downloadManager: downloadManager)
+					.transition(.move(edge: .top).combined(with: .opacity))
+				VariedTabbarView()
+					.environment(\.managedObjectContext, storage.context)
+					.onOpenURL(perform: _handleURL)
+					.transition(.move(edge: .top).combined(with: .opacity))
+			}
+			.animation(.smooth, value: downloadManager.manualDownloads.description)
+		}
+	}
+	
+	private func _handleURL(_ url: URL) {
+		if url.scheme == "feather" {
+			if let fullPath = url.validatedScheme(after: "/source/") {
+				FR.handleSource(fullPath) { }
+			}
+			
+			if
+				let fullPath = url.validatedScheme(after: "/install/"),
+				let downloadURL = URL(string: fullPath)
+			{
+				_ = DownloadManager.shared.startDownload(from: downloadURL)
+			}
+		} else {
+			if url.pathExtension == "ipa" || url.pathExtension == "tipa" {
+				if FileManager.default.isFileFromFileProvider(at: url) {
+					guard url.startAccessingSecurityScopedResource() else { return }
+					FR.handlePackageFile(url) { _ in }
+				} else {
+					FR.handlePackageFile(url) { _ in }
+				}
+				
+				return
+			}
+		}
+	}
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        
+        _createPipeline()
+        _createSourcesDirectory()
+        _createTweaksDirectory()
+        if !UserDefaults.standard.bool(forKey: "hasInitializedBuiltInSources") {
+            _initializeBuiltInSources()
+            UserDefaults.standard.set(true, forKey: "hasInitializedBuiltInSources")
+        }
+        
+        CertificateEncryption.migrateExistingCertificates()
+        
+        _clean()
+        
+#if SERVER
+        _downloadSSLCertificates()
+#endif
+        return true
+    }
+    
+    private func _initializeBuiltInSources() { 
+        Storage.shared.addBuiltInSources()
+    }
+    
+    private func _createPipeline() {
+        DataLoader.sharedUrlCache.diskCapacity = 0
+        
+        let pipeline = ImagePipeline {
+            let dataLoader: DataLoader = {
+                let config = URLSessionConfiguration.default
+                config.urlCache = nil
+                return DataLoader(configuration: config)
+            }()
+            let dataCache = try? DataCache(name: "thewonderofyou.Feather.datacache") // disk cache
+            let imageCache = Nuke.ImageCache() // memory cache
+            dataCache?.sizeLimit = 500 * 1024 * 1024
+            imageCache.costLimit = 100 * 1024 * 1024
+            $0.dataCache = dataCache
+            $0.imageCache = imageCache
+            $0.dataLoader = dataLoader
+            $0.dataCachePolicy = .automatic
+            $0.isStoringPreviewsInMemoryCache = false
+        }
+        
+        ImagePipeline.shared = pipeline
+    }
+    
+    private func _createSourcesDirectory() {
+        let fileManager = FileManager.default
+        
+        let appDirectory = URL.documentsDirectory.appendingPathComponent("App")
+        try? fileManager.createDirectoryIfNeeded(at: appDirectory)
+        
+        let directories = ["Signed", "Unsigned", "Archives", "Server", "Tweaks"].map {
+            appDirectory.appendingPathComponent($0)
+        }
+        
+        for url in directories {
+            try? fileManager.createDirectoryIfNeeded(at: url)
+        }
+    }
+    
+    private func _createTweaksDirectory() {
+        let fileManager = FileManager.default
+        let tweaksDirectory = fileManager.tweaks
+        
+        do {
+            try fileManager.createDirectoryIfNeeded(at: tweaksDirectory)
+            print("Tweaks directory created at: \(tweaksDirectory.path)")
+        } catch {
+            print("Error creating tweaks directory: \(error)")
+        }
+    }
+    
+    private func _clean() {
+        let fileManager = FileManager.default
+        let tmpDirectory = fileManager.temporaryDirectory
+        
+        if let files = try? fileManager.contentsOfDirectory(atPath: tmpDirectory.path()) {
+            for file in files {
+                try? fileManager.removeItem(atPath: tmpDirectory.appendingPathComponent(file).path())
+            }
+        }
+    }
+    
+#if SERVER
+    private func _downloadSSLCertificates() {
+        let serverURL = "https://backloop.dev/pack.json"
+        
+        FR.downloadSSLCertificates(from: serverURL) { success in
+            if success {
+                print("SSL certificates downloaded successfully")
+            } else {
+                print("Failed to download SSL certificates")
+            }
+        }
+    }
+#endif
+}
