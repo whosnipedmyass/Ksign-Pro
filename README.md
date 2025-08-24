@@ -1,9 +1,11 @@
 
 <img src="https://github.com/user-attachments/assets/986892f9-c32f-448d-a24e-ba8659203fbf" height="200">
 
-# Ksign
+# Ksign 
+[![GitHub Release](https://img.shields.io/github/v/release/nyasami/ksign?style=for-the-badge&color=3c94fc)](https://github.com/nyasami/ksign/releases/latest) 
+[![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/nyasami/ksign/total?style=for-the-badge&color=6bc563)](https://github.com/nyasami/ksign/releases)
 
-Yet another codesigning app, have you ever wondered what if Feather and Esign had a child? Welcome to Ksign!
+Yet another codesigning app, have you ever wondered what if Feather and Esign had a child?
 
 ## Why?
 Since Esign is end of service so people been moving to other signing apps, but Esign was a really big part of the community, so with the help of Feather as the base app, I tried to recreate Esign as close as possible so you guys can easier to get familiar and less app switching for smooth sideloading.
