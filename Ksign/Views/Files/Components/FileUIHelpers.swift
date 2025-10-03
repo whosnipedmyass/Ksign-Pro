@@ -79,26 +79,4 @@ struct FileUIHelpers {
             showingActionSheet.wrappedValue = true
         }
     }
-    
-    // MARK: - Progress View
-    
-    static func extractionProgressView(progress: Double) -> some View {
-        VStack {
-            ProgressView(value: progress, total: 1.0)
-                .progressViewStyle(LinearProgressViewStyle())
-                .padding()
-            
-            Text(String(localized: "Extracting \(Int(progress * 100))%"))
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-        .frame(width: 200)
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(UIColor.systemBackground))
-                .shadow(radius: 5)
-        )
-        .transition(.scale.combined(with: .opacity))
-    }
 } 

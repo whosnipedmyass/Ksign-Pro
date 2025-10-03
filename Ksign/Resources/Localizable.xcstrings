@@ -3394,6 +3394,7 @@
       }
     },
     "Extracting %lld%%" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
