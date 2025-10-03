@@ -14,7 +14,6 @@ struct FileRow: View {
     @Binding var plistFileURL: URL?
     @Binding var hexEditorFileURL: URL?
     @Binding var shareItems: [Any]
-    @Binding var showingShareSheet: Bool
     @Binding var moveFileItem: FileItem?
     
     let onExtractArchive: (FileItem) -> Void
@@ -30,7 +29,6 @@ struct FileRow: View {
         plistFileURL: Binding<URL?>,
         hexEditorFileURL: Binding<URL?>,
         shareItems: Binding<[Any]>,
-        showingShareSheet: Binding<Bool>,
         moveFileItem: Binding<FileItem?>,
         onExtractArchive: @escaping (FileItem) -> Void,
         onPackageApp: @escaping (FileItem) -> Void,
@@ -44,7 +42,6 @@ struct FileRow: View {
         self._plistFileURL = plistFileURL
         self._hexEditorFileURL = hexEditorFileURL
         self._shareItems = shareItems
-        self._showingShareSheet = showingShareSheet
         self._moveFileItem = moveFileItem
         self.onExtractArchive = onExtractArchive
         self.onPackageApp = onPackageApp
@@ -262,12 +259,8 @@ struct FileRow: View {
         .tint(.primary)
         
         Button {
-            file.url.startAccessingSecurityScopedResource()
             shareItems = [file.url]
-            showingShareSheet = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                file.url.stopAccessingSecurityScopedResource()
-            }
+            UIActivityViewController.show(activityItems: shareItems)
         } label: {
             Label(String(localized: "Share"), systemImage: "square.and.arrow.up")
         }

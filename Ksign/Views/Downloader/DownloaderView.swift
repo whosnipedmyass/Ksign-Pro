@@ -19,14 +19,12 @@ struct DownloaderView: View {
     @State private var showWebView = false
     @State private var showURLAlert = false
     @State private var urlText = ""
-    @State private var showError = false
     @State private var errorMessage = ""
     @State private var selectedItem: DownloadItem?
     @State private var showActionSheet = false
     @State private var webViewURL = URL(string: "https://apple.com")!
     @State private var isLoading = false
     @State private var webViewTitle = "Web Browser"
-    @State private var showingShareSheet = false
     @State private var shareItems: [Any] = []
     @State private var showDocumentPicker = false
     @State private var fileToExport: URL?
@@ -65,19 +63,11 @@ struct DownloaderView: View {
         } message: {
             Text("Enter the URL of the website containing the IPA file")
         }
-        .alert("Error", isPresented: $showError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(errorMessage)
-        }
         .confirmationDialog("Choose an action", isPresented: $showActionSheet, titleVisibility: .visible) {
             actionSheetContent
         }
         .sheet(isPresented: $showWebView) {
             webViewSheet
-        }
-        .sheet(isPresented: $showingShareSheet) {
-            DownloaderShareSheet(items: shareItems)
         }
         .sheet(isPresented: $showDocumentPicker) {
             documentPickerSheet
@@ -202,7 +192,7 @@ private extension DownloaderView {
             }
             
             Button("Import to Library") {
-                importItemToLibrary(selectedItem)
+                importIpaToLibrary(selectedItem)
             }
             
             Button("Export to Files App") {
@@ -222,7 +212,6 @@ private extension DownloaderView {
             downloadManager: downloadManager,
             isPresented: $showWebView,
             url: webViewURL,
-            showError: $showError,
             errorMessage: $errorMessage
         )
     }
@@ -230,9 +219,17 @@ private extension DownloaderView {
     @ViewBuilder
     var documentPickerSheet: some View {
         if let fileURL = fileToExport {
-            DocumentPickerView(fileURL: fileURL)
+            FileExporterRepresentableView(
+                urlsToExport: [fileURL],
+                asCopy: true,
+                useLastLocation: false,
+                onCompletion: { _ in
+                    showDocumentPicker = false
+                }
+            )
         }
     }
+
 }
 
 // MARK: - Action Handlers
@@ -246,7 +243,7 @@ private extension DownloaderView {
         }
         
         guard let url = URL(string: finalUrl) else {
-            showErrorMessage("Invalid URL format")
+            UIAlertController.showAlertWithOk(title: "Error", message: "Invalid URL format")
             return
         }
         
@@ -257,7 +254,7 @@ private extension DownloaderView {
                     case .success:
                         break // Success handled by download manager
                     case .failure(let error):
-                        showErrorMessage(error.localizedDescription)
+                        UIAlertController.showAlertWithOk(title: "Error", message: error.localizedDescription)
                     }
                 }
             }
@@ -270,61 +267,21 @@ private extension DownloaderView {
     }
     
     func shareItem(_ item: DownloadItem) {
-        let didStartAccessing = item.localPath.startAccessingSecurityScopedResource()
-        defer {
-            if didStartAccessing {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    item.localPath.stopAccessingSecurityScopedResource()
-                }
-            }
-        }
-        
         shareItems = [item.localPath]
-        showingShareSheet = true
+        UIActivityViewController.show(activityItems: shareItems)
     }
     
-    func importItemToLibrary(_ item: DownloadItem) {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            isExtracting = true
-            extractionProgress = 0.0
-        }
-        
-        Task {
-            do {
-                let id = "FeatherDownloader_\(UUID().uuidString)"
-                
-                await MainActor.run {
-                    extractionProgress = 0.1
+    private func importIpaToLibrary(_ file: DownloadItem) {
+        let id = "FeatherManualDownload_\(UUID().uuidString)"
+        let download = self.libraryManager.startArchive(from: file.url, id: id)
+        libraryManager.handlePachageFile(url: file.url, dl: download) { err in
+            DispatchQueue.main.async {
+                if let error = err {
+                    UIAlertController.showAlertWithOk(title: "Error", message: "Whoops!, something went wrong when extracting the file. \nMaybe try switching the extraction library in the settings?")
+                } else {
                 }
-                
-                let download = libraryManager.startArchive(from: item.localPath, id: id)
-                
-                await MainActor.run {
-                    extractionProgress = 0.3
-                }
-                
-                try await libraryManager.handlePachageFile(url: item.localPath, dl: download)
-                
-                await MainActor.run {
-                    extractionProgress = 0.8
-                }
-                
-                try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-                
-                await MainActor.run {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isExtracting = false
-                    }
-                    showErrorMessage("Successfully imported \(item.title) to Library")
-                    NotificationCenter.default.post(name: Notification.Name("lfetch"), object: nil)
-                }
-            } catch {
-                print("Import error: \(error)")
-                await MainActor.run {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isExtracting = false
-                    }
-                    showErrorMessage("Failed to import to Library: \(error.localizedDescription)")
+                if let index = libraryManager.getDownloadIndex(by: download.id) {
+                    libraryManager.downloads.remove(at: index)
                 }
             }
         }
@@ -340,8 +297,4 @@ private extension DownloaderView {
         downloadManager.deleteIPA(at: IndexSet(integer: index))
     }
     
-    func showErrorMessage(_ message: String) {
-        errorMessage = message
-        showError = true
-    }
 } 

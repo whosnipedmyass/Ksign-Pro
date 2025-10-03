@@ -16,10 +16,12 @@ struct LibraryView: View {
 	@State private var _selectedInfoAppPresenting: AnyApp?
 	@State private var _selectedSigningAppPresenting: AnyApp?
 	@State private var _selectedInstallAppPresenting: AnyApp?
+	@State private var _selectedAppDylibsPresenting: AnyApp?
+	@State private var _isBulkSigningPresenting = false
 	@State private var _isImportingPresenting = false
 	@State private var _isDownloadingPresenting = false
+
 	@State private var _alertDownloadString: String = "" // for _isDownloadingPresenting
-	
 	@State private var _searchText = ""
 	@State private var _selectedTab: Int = 0 // 0 for Downloaded, 1 for Signed
 	
@@ -82,6 +84,7 @@ struct LibraryView: View {
 									selectedInfoAppPresenting: $_selectedInfoAppPresenting,
 									selectedSigningAppPresenting: $_selectedSigningAppPresenting,
 									selectedInstallAppPresenting: $_selectedInstallAppPresenting,
+									selectedAppDylibsPresenting: $_selectedAppDylibsPresenting,
 									isEditMode: $_isEditMode,
 									selectedApps: $_selectedApps
 								)
@@ -99,6 +102,7 @@ struct LibraryView: View {
 									selectedInfoAppPresenting: $_selectedInfoAppPresenting,
 									selectedSigningAppPresenting: $_selectedSigningAppPresenting,
 									selectedInstallAppPresenting: $_selectedInstallAppPresenting,
+									selectedAppDylibsPresenting: $_selectedAppDylibsPresenting,
 									isEditMode: $_isEditMode,
 									selectedApps: $_selectedApps
 								)
@@ -139,11 +143,18 @@ struct LibraryView: View {
 						}
 					}
 					
-					ToolbarItem(placement: .topBarTrailing) {
+					ToolbarItemGroup(placement: .topBarTrailing) {
+						Button {
+							_isBulkSigningPresenting = true
+						} label: {
+							NBButton(.localized("Sign"), systemImage: "signature", style: .icon)
+						}
+                        .disabled(_selectedApps.isEmpty)
+						
 						Button {
 							_bulkDeleteSelectedApps()
 						} label: {
-							NBButton(.localized("Delete"), systemImage: "trash", style: .text)
+							NBButton(.localized("Delete"), systemImage: "trash", style: .icon)
 						}
 						.disabled(_selectedApps.isEmpty)
 					}
@@ -178,6 +189,21 @@ struct LibraryView: View {
 				SigningView(app: app.base, signAndInstall: app.signAndInstall)
 					.compatNavigationTransition(id: app.base.uuid ?? "", ns: _namespace)
 			}
+			.fullScreenCover(item: $_selectedAppDylibsPresenting) { app in
+                DylibsView(app: app.base)
+					.compatNavigationTransition(id: app.base.uuid ?? "", ns: _namespace)
+			}
+			.fullScreenCover(isPresented: $_isBulkSigningPresenting) {
+				BulkSigningView(apps: _selectedApps.compactMap { id in
+					(_importedApps.first(where: { $0.uuid == id }) as AppInfoPresentable?)
+					?? (_signedApps.first(where: { $0.uuid == id }) as AppInfoPresentable?)
+				})
+				.compatNavigationTransition(id: _selectedApps.joined(separator: ","), ns: _namespace)
+				.onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ksign.bulkSigningFinished"))) { notification in
+					_toggleEditMode()
+					_selectedTab = 1
+				}
+			}
 			.sheet(isPresented: $_isImportingPresenting) {
 				FileImporterRepresentableView(
 					allowedContentTypes:  [.ipa, .tipa],
@@ -209,8 +235,8 @@ struct LibraryView: View {
 				}
 			}
 			.onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("feather.installApp"))) { notification in
-				if let app = notification.object as? AnyApp {
-					_selectedInstallAppPresenting = app
+                if let app = _signedApps.first {
+                    _selectedInstallAppPresenting = AnyApp(base: app)
 				}
 			}
         }

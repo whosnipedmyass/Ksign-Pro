@@ -13,24 +13,62 @@ class TweakHandler {
 	private let _fileManager = FileManager.default
 	private var _urlsToInject: [URL] = []
 	private var _directoriesToCheck: [URL] = []
+    
 
 	private var _urls: [URL]
 	private let _app: URL
-
-	init(app: URL, with urls: [URL]) {
+    private var _options: Options
+    
+    init(app: URL, with urls: [URL], options: Options = OptionsManager.shared.options) {
 		self._app = app
 		self._urls = urls
-		
+        self._options = options
 	}
+    
+    private func _checkEllekit() async throws {
+        let frameworksPath = _app.appendingPathComponent("Frameworks").appendingPathComponent("CydiaSubstrate.framework")
+
+        func addEllekit() async throws {
+            if let ellekitURL = Bundle.main.url(forResource: "ellekit", withExtension: "deb") {
+                self._urls.insert(ellekitURL, at: 0)
+            } else {
+                print("ellekit.deb not found in the app bundle")
+            }
+            
+            try _fileManager.createDirectoryIfNeeded(at: _app.appendingPathComponent("Frameworks"))
+        }
+        // we should check if CydiaSubstrate.framework exists, if it doesn't
+        // just add ellekit
+        // experiment_replaceSubstrateWithEllekit:
+        //     for this version, we need to replace CydiaSubstrate.framework with
+        //    our own version containing ElleKit
+        // other:
+        //     just return if it exists, should work fine
+        if _fileManager.fileExists(atPath: frameworksPath.path) {
+            if _options.experiment_replaceSubstrateWithEllekit {
+                print("Attempting to replace Substrate with ElleKit")
+                try _fileManager.removeFileIfNeeded(at: frameworksPath)
+                try await addEllekit()
+            } else {
+                return
+            }
+        } else {
+            guard !_urls.isEmpty else { return }
+            try await addEllekit()
+        }
+    }
 
 	public func getInputFiles() async throws {
 		print("DEBUG: getInputFiles called, URLs count: \(_urls.count)")
 		print("DEBUG: App path: \(_app.path)")
 		
+        try await _checkEllekit()
+        
 		// Create Frameworks directory if it doesn't exist
 		let frameworksDir = _app.appendingPathComponent("Frameworks")
 		try _fileManager.createDirectoryIfNeeded(at: frameworksDir)
 		
+        
 		
 		// If we still have no URLs, just return - we've at least tried to replace the framework
 		if _urls.isEmpty {

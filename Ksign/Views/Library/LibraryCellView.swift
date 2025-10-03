@@ -21,10 +21,10 @@ struct LibraryCellView: View {
 	@Binding var selectedInfoAppPresenting: AnyApp?
 	@Binding var selectedSigningAppPresenting: AnyApp?
 	@Binding var selectedInstallAppPresenting: AnyApp?
+	@Binding var selectedAppDylibsPresenting: AnyApp?
 	@Binding var isEditMode: Bool
 	@Binding var selectedApps: Set<String>
 	@State private var _showActionSheet = false
-	@State private var _showDylibsView = false
 	
 	private var _isSelected: Bool {
 		selectedApps.contains(app.uuid ?? "")
@@ -106,11 +106,6 @@ struct LibraryCellView: View {
 				_contextActionsExtra(for: app)
 				Divider()
 				_actions(for: app)
-			}
-		}
-		.sheet(isPresented: $_showDylibsView) {
-			if let appDir = Storage.shared.getAppDirectory(for: app) {
-				DylibsView(appPath: appDir, appName: app.name ?? .localized("Frameworks & Dylibs"))
 			}
 		}
 	}
@@ -217,7 +212,7 @@ extension LibraryCellView {
 		}
 		
 		Button(.localized("Show Dylibs")) {
-			_showDylibsView = true
+			selectedAppDylibsPresenting = AnyApp(base: app)
 		}
 		
 		Button(.localized("Get Info")) {

@@ -11,7 +11,6 @@ import WebKit
 struct WebViewContainer: UIViewRepresentable {
     @ObservedObject var downloadManager: IPADownloadManager
     @Binding var isPresented: Bool
-    @Binding var showError: Bool
     @Binding var errorMessage: String
     @Binding var isLoading: Bool
     @Binding var title: String
@@ -19,10 +18,9 @@ struct WebViewContainer: UIViewRepresentable {
     
     let webView: WKWebView
     
-    init(downloadManager: IPADownloadManager, isPresented: Binding<Bool>, showError: Binding<Bool>, errorMessage: Binding<String>, isLoading: Binding<Bool>, title: Binding<String>, url: URL) {
+    init(downloadManager: IPADownloadManager, isPresented: Binding<Bool>, errorMessage: Binding<String>, isLoading: Binding<Bool>, title: Binding<String>, url: URL) {
         self.downloadManager = downloadManager
         self._isPresented = isPresented
-        self._showError = showError
         self._errorMessage = errorMessage
         self._isLoading = isLoading
         self._title = title
@@ -79,8 +77,7 @@ struct WebViewContainer: UIViewRepresentable {
                 case .success(let filename):
                     self.isPresented = false
                 case .failure(let error):
-                    self.errorMessage = error.localizedDescription
-                    self.showError = true
+                    UIAlertController.showAlertWithOk(title: "Error", message: error.localizedDescription)
                 }
             }
         }

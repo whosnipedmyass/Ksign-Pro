@@ -31,7 +31,6 @@ struct FilesView: View {
     @State private var moveSingleFile: FileItem?
     @State private var showFilePreview = false
     @State private var previewFile: FileItem?
-    @State private var showingShareSheet = false
     @State private var shareItems: [Any] = []
     @State private var navigateToDirectoryURL: URL?
     
@@ -124,9 +123,6 @@ struct FilesView: View {
                     viewModel.importFiles(urls: urls)
                 }
             )
-        }
-        .sheet(isPresented: $showingShareSheet) {
-            ShareSheet(items: shareItems)
         }
         .sheet(item: $moveSingleFile) { item in
             FileExporterRepresentableView(
@@ -252,7 +248,6 @@ struct FilesView: View {
                     plistFileURL: $plistFileURL,
                     hexEditorFileURL: $hexEditorFileURL,
                     shareItems: $shareItems,
-                    showingShareSheet: $showingShareSheet,
                     moveFileItem: $moveSingleFile,
                     onExtractArchive: extractArchive,
                     onPackageApp: packageAppAsIPA,
@@ -386,7 +381,7 @@ struct FilesView: View {
             if !viewModel.selectedItems.isEmpty {
                 let urls = viewModel.selectedItems.map { $0.url }
                 shareItems = urls
-                showingShareSheet = true
+                UIActivityViewController.show(activityItems: shareItems)
             }
         } label: {
             Image(systemName: "square.and.arrow.up")
