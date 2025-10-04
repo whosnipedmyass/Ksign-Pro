@@ -50,9 +50,9 @@ final class InstallerStatusViewModel: ObservableObject {
 		case .none: return "Packaging"
 		case .ready: return "Ready"
 		case .sendingManifest: return "Sending Manifest"
-		case .sendingPayload: return "Sending Payload"
+		case .sendingPayload: return "︻デ═一"
 		case .installing: return "Installing"
-		case .completed: return "Completed"
+		case .completed: return "︻デ═一 X"
 		case .broken: return "Error"
 		}
 	}
