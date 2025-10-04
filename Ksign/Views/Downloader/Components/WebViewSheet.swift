@@ -13,7 +13,6 @@ struct WebViewSheet: View {
     @ObservedObject var downloadManager: IPADownloadManager
     @Binding var isPresented: Bool
     let url: URL
-    @Binding var showError: Bool
     @Binding var errorMessage: String
     @State private var isLoading = false
     @State private var title = "Web Browser"
@@ -24,7 +23,6 @@ struct WebViewSheet: View {
                 WebViewContainer(
                     downloadManager: downloadManager,
                     isPresented: $isPresented,
-                    showError: $showError,
                     errorMessage: $errorMessage,
                     isLoading: $isLoading,
                     title: $title,

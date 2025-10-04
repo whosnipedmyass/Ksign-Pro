@@ -100,6 +100,11 @@ struct Options: Codable, Equatable {
 	var useLastExportLocation: Bool?
 	/// If Ksign should use Zip or ZIPFoundation
 	var extractionLibrary: String?
+    /// Modifies app to support liquid glass
+    var experiment_supportLiquidGlass: Bool
+    /// Modifies application to use ElleKit instead of CydiaSubstrate
+    var experiment_replaceSubstrateWithEllekit: Bool
+    
 	// default
 	static let defaultOptions = Options(
 		appAppearance: "Default",
@@ -126,7 +131,9 @@ struct Options: Codable, Equatable {
 		removeApp: false,
         onlyModify: false,
 		useLastExportLocation: false,
-		extractionLibrary: "Zip"
+		extractionLibrary: "Zip",
+        experiment_supportLiquidGlass: false,
+        experiment_replaceSubstrateWithEllekit: false
 	)
 	// extraction library values
 	static let extractionLibraryValues = ["Zip", "ZIPFoundation"]

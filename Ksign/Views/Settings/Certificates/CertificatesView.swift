@@ -167,33 +167,8 @@ extension CertificatesView {
 		let tempDir = FileManager.default.temporaryDirectory
 		let fileName = "\(sanitizedName).ksign"
 		let fileURL = tempDir.appendingPathComponent(fileName)
-		
-		do {
-			try finalData.write(to: fileURL)
-			
-			let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
-			
-			if let popover = activityVC.popoverPresentationController {
-				if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-				   let window = windowScene.windows.first {
-					popover.sourceView = window.rootViewController?.view
-					popover.sourceRect = CGRect(x: window.bounds.midX, y: window.bounds.midY, width: 0, height: 0)
-					popover.permittedArrowDirections = []
-				}
-			}
-			
-			if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-			   let rootViewController = windowScene.windows.first?.rootViewController {
-				
-				if let presentedVC = rootViewController.presentedViewController {
-					presentedVC.present(activityVC, animated: true)
-				} else {
-					rootViewController.present(activityVC, animated: true)
-				}
-			}
-		} catch {
-			print("Error exporting certificate: \(error)")
-		}
+
+		UIActivityViewController.show(activityItems: [fileURL])
 	}
 	
 

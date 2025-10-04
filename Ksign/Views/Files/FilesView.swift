@@ -24,14 +24,11 @@ struct FilesView: View {
     @Namespace private var animation
     @AppStorage("Feather.useLastExportLocation") private var _useLastExportLocation: Bool = false
 
-    @State private var extractionProgress: Double = 0
-    @State private var isExtracting = false
     @State private var plistFileURL: URL?
     @State private var hexEditorFileURL: URL?
     @State private var moveSingleFile: FileItem?
     @State private var showFilePreview = false
     @State private var previewFile: FileItem?
-    @State private var showingShareSheet = false
     @State private var shareItems: [Any] = []
     @State private var navigateToDirectoryURL: URL?
     
@@ -112,9 +109,6 @@ struct FilesView: View {
                     }
                 }
             
-            if isExtracting {
-                extractionProgressView
-            }
         }
         .sheet(isPresented: $viewModel.showingImporter) {
             FileImporterRepresentableView(
@@ -124,9 +118,6 @@ struct FilesView: View {
                     viewModel.importFiles(urls: urls)
                 }
             )
-        }
-        .sheet(isPresented: $showingShareSheet) {
-            ShareSheet(items: shareItems)
         }
         .sheet(item: $moveSingleFile) { item in
             FileExporterRepresentableView(
@@ -199,11 +190,6 @@ struct FilesView: View {
         } message: {
             Text(String(localized: "Enter the password for the certificate. Leave it blank if no password is required."))
         }
-        .onAppear {
-            if !isRootView {
-                setupNotifications()
-            }
-        }
     }
     
     // MARK: - Content Views
@@ -252,7 +238,6 @@ struct FilesView: View {
                     plistFileURL: $plistFileURL,
                     hexEditorFileURL: $hexEditorFileURL,
                     shareItems: $shareItems,
-                    showingShareSheet: $showingShareSheet,
                     moveFileItem: $moveSingleFile,
                     onExtractArchive: extractArchive,
                     onPackageApp: packageAppAsIPA,
@@ -289,37 +274,14 @@ struct FilesView: View {
         }
     }
     
-    private var extractionProgressView: some View {
-        FileUIHelpers.extractionProgressView(progress: extractionProgress)
-    }
-    
+
     // MARK: - Setup Methods
     
     private func setupView() {
         viewModel.loadFiles()
     }
     
-    private func setupNotifications() {
-        NotificationCenter.default.addObserver(forName: NSNotification.Name("ExtractionStarted"), object: nil, queue: .main) { _ in
-            self.isExtracting = true
-            self.extractionProgress = 0.1
-        }
-        
-        NotificationCenter.default.addObserver(forName: NSNotification.Name("ExtractionCompleted"), object: nil, queue: .main) { _ in
-            self.extractionProgress = 1.0
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation {
-                    self.isExtracting = false
-                }
-            }
-        }
-        
-        NotificationCenter.default.addObserver(forName: NSNotification.Name("ExtractionFailed"), object: nil, queue: .main) { _ in
-            self.isExtracting = false
-        }
-        
    
-    }
     
     // MARK: - Toolbar Items
     
@@ -386,7 +348,7 @@ struct FilesView: View {
             if !viewModel.selectedItems.isEmpty {
                 let urls = viewModel.selectedItems.map { $0.url }
                 shareItems = urls
-                showingShareSheet = true
+                UIActivityViewController.show(activityItems: shareItems)
             }
         } label: {
             Image(systemName: "square.and.arrow.up")
@@ -417,20 +379,17 @@ struct FilesView: View {
     private func extractArchive(_ file: FileItem) {
         guard file.isArchive else { return }
         
-        isExtracting = true
-        extractionProgress = 0.0
-        
+        let extractItem = ExtractManager.shared.start(fileName: file.name)
         ExtractionService.extractArchive(
             file,
             to: viewModel.currentDirectory,
             progressCallback: { progress in
                 DispatchQueue.main.async {
-                    self.extractionProgress = progress
+                    ExtractManager.shared.updateProgress(for: extractItem, progress: progress)
                 }
             }
         ) { result in
             DispatchQueue.main.async {
-                self.isExtracting = false
                 
                 switch result {
                 case .success:
@@ -442,6 +401,7 @@ struct FilesView: View {
                     self.viewModel.error = String(localized: "Whoops!, something went wrong when extracting the file. \nMaybe try switching the extraction library in the settings?")
                     self.viewModel.showingError = true
                 }
+                ExtractManager.shared.finish(item: extractItem)
             }
         }
     }
@@ -449,20 +409,17 @@ struct FilesView: View {
     private func packageAppAsIPA(_ file: FileItem) {
         guard file.isAppDirectory else { return }
         
-        isExtracting = true
-        extractionProgress = 0.0
-        
+        let extractItem = ExtractManager.shared.start(fileName: file.name)
         ExtractionService.packageAppAsIPA(
             file,
             to: viewModel.currentDirectory,
             progressCallback: { progress in
                 DispatchQueue.main.async {
-                    self.extractionProgress = progress
+                    ExtractManager.shared.updateProgress(for: extractItem, progress: progress)
                 }
             }
         ) { result in
             DispatchQueue.main.async {
-                self.isExtracting = false
                 
                 switch result {
                 case .success(let ipaFileName):
@@ -474,6 +431,7 @@ struct FilesView: View {
                     self.viewModel.error = String(localized: "Failed to package IPA: \(error.localizedDescription)")
                     self.viewModel.showingError = true
                 }
+                ExtractManager.shared.finish(item: extractItem)
             }
         }
     }

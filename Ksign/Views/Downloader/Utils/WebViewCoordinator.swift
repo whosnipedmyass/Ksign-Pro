@@ -160,8 +160,7 @@ class WebViewCoordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler
             return
         }
         
-        parent.errorMessage = error.localizedDescription
-        parent.showError = true
+        UIAlertController.showAlertWithOk(title: "Error", message: error.localizedDescription)
     }
     
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
