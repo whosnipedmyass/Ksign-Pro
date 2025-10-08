@@ -17,6 +17,7 @@ struct FeatherApp: App {
 	@StateObject var downloadManager = DownloadManager.shared
 	@StateObject var accentColorManager = AccentColorManager.shared
     @StateObject var extractManager = ExtractManager.shared
+	@StateObject var logsManager = LogsManager.shared
 	let storage = Storage.shared
 
 	var body: some Scene {
@@ -39,6 +40,7 @@ struct FeatherApp: App {
 			}
 			.onAppear {
 				accentColorManager.updateGlobalTintColor()
+				if logsManager.isCapturing { logsManager.startCapture() }
 			}
 		}
 	}

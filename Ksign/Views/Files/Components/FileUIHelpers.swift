@@ -40,20 +40,6 @@ struct FileUIHelpers {
         .tint(.blue)
     }
     
-    // MARK: - File Sharing
-    
-    static func shareFile(_ file: FileItem, shareItems: Binding<[Any]>, showingShareSheet: Binding<Bool>) {
-        let didStartAccessing = file.url.startAccessingSecurityScopedResource()
-        
-        shareItems.wrappedValue = [file.url]
-        showingShareSheet.wrappedValue = true
-        
-        if didStartAccessing {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                file.url.stopAccessingSecurityScopedResource()
-            }
-        }
-    }
     
     // MARK: - File Tap Handling
     

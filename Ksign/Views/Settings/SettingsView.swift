@@ -33,6 +33,9 @@ struct SettingsView: View {
 				}
 				
 				NBSection(.localized("Features")) {
+                    NavigationLink(destination: LogsView(manager: LogsManager.shared)) {
+                        Label(.localized("Logs"), systemImage: "apple.terminal")
+                    }
 					NavigationLink(destination: CertificatesView()) {
                         Label(.localized("Certificates"), systemImage: "signature")
                     }
