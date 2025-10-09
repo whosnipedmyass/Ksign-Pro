@@ -36,6 +36,9 @@ struct SettingsView: View {
                     NavigationLink(destination: LogsView(manager: LogsManager.shared)) {
                         Label(.localized("Logs"), systemImage: "apple.terminal")
                     }
+					NavigationLink(destination: AppFeaturesView()) {
+                        Label(.localized("App Features"), systemImage: "sparkles")
+                    }
 					NavigationLink(destination: CertificatesView()) {
                         Label(.localized("Certificates"), systemImage: "signature")
                     }

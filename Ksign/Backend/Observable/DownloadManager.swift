@@ -56,6 +56,15 @@ class DownloadManager: NSObject, ObservableObject {
 	
     private var _session: URLSession!
     
+    private func _updateBackgroundAudioState() {
+		guard OptionsManager.shared.options.backgroundAudio else { return }
+        if !downloads.isEmpty {
+            BackgroundAudioManager.shared.start()
+        } else  {
+            BackgroundAudioManager.shared.stop()
+        }
+    }
+    
     override init() {
         super.init()
         let configuration = URLSessionConfiguration.default
@@ -78,6 +87,7 @@ class DownloadManager: NSObject, ObservableObject {
         task.resume()
         
         downloads.append(download)
+        _updateBackgroundAudioState()
         return download
     }
 	
@@ -87,6 +97,7 @@ class DownloadManager: NSObject, ObservableObject {
 	) -> Download {
 		let download = Download(id: id, url: url, onlyArchiving: true)
 		downloads.append(download)
+		_updateBackgroundAudioState()
 		return download
 	}
     
@@ -95,10 +106,12 @@ class DownloadManager: NSObject, ObservableObject {
             let task = _session.downloadTask(withResumeData: resumeData)
             download.task = task
             task.resume()
+            _updateBackgroundAudioState()
         } else if let url = download.task?.originalRequest?.url {
             let task = _session.downloadTask(with: url)
             download.task = task
             task.resume()
+            _updateBackgroundAudioState()
         }
     }
     
@@ -107,6 +120,7 @@ class DownloadManager: NSObject, ObservableObject {
         
         if let index = downloads.firstIndex(where: { $0.id == download.id }) {
             downloads.remove(at: index)
+            _updateBackgroundAudioState()
         }
     }
     

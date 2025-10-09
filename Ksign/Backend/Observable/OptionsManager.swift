@@ -104,7 +104,8 @@ struct Options: Codable, Equatable {
     var experiment_supportLiquidGlass: Bool
     /// Modifies application to use ElleKit instead of CydiaSubstrate
     var experiment_replaceSubstrateWithEllekit: Bool
-    
+    /// If Ksign should use background audio
+    var backgroundAudio: Bool
 	// default
 	static let defaultOptions = Options(
 		appAppearance: "Default",
@@ -133,7 +134,8 @@ struct Options: Codable, Equatable {
 		useLastExportLocation: false,
 		extractionLibrary: "Zip",
         experiment_supportLiquidGlass: false,
-        experiment_replaceSubstrateWithEllekit: false
+        experiment_replaceSubstrateWithEllekit: false,
+        backgroundAudio: true
 	)
 	// extraction library values
 	static let extractionLibraryValues = ["Zip", "ZIPFoundation"]
