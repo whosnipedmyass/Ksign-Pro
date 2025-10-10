@@ -60,6 +60,15 @@ struct SettingsView: View {
 				}
 				
 				_directories()
+                
+                Section {
+                    NavigationLink(destination: ResetView()) {
+                        Label(.localized("Reset"), systemImage: "trash")
+                    }
+                } footer: {
+                    Text(.localized("Reset the applications sources, certificates, apps, and general contents."))
+                }
+
             }
         }
     }
