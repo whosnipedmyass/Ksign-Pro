@@ -35,7 +35,6 @@ struct FeatherApp: App {
 			}
 			.animation(.smooth, value: downloadManager.manualDownloads.description)
             .animation(.smooth, value: extractManager.extractItems.description)
-			.tint(accentColorManager.currentAccentColor)
 			.onReceive(accentColorManager.objectWillChange) { _ in
 				accentColorManager.updateGlobalTintColor()
 			}

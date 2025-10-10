@@ -292,13 +292,11 @@ struct FilesView: View {
             } label: {
                 Label(String(localized: "Import Files"), systemImage: "doc.badge.plus")
             }
-            .tint(.primary)
             Button {
                 viewModel.showingNewFolderDialog = true
             } label: {
                 Label(String(localized: "New Folder"), systemImage: "folder.badge.plus")
             }
-            .tint(.primary)
         } label: {
             Image(systemName: "plus")
         }
@@ -361,7 +359,6 @@ struct FilesView: View {
             viewModel.deleteSelectedItems()
         } label: {
             Image(systemName: "trash")
-                .tint(.red)
         }
         .disabled(viewModel.selectedItems.isEmpty)
     }
