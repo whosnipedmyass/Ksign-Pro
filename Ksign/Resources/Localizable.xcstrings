@@ -4009,6 +4009,17 @@
         }
       }
     },
+    "Get" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhận"
+          }
+        }
+      }
+    },
     "Get access to our secret Discord by donating, where we talk about future updates, betas, and potential ways to make your experience better." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4112,6 +4123,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Xem thông tin"
+          }
+        }
+      }
+    },
+    "Get started by importing your first IPA files." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bắt đầu bằng cách nhập IPA đầu tiên của bạn."
           }
         }
       }
@@ -5185,6 +5207,17 @@
         }
       }
     },
+    "Keep app running in background" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cho phép chạy nền"
+          }
+        }
+      }
+    },
     "Library" : {
       "comment" : "Library tab",
       "extractionState" : "manual",
@@ -5297,6 +5330,17 @@
     },
     "Loading plist..." : {
 
+    },
+    "Logs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhật ký"
+          }
+        }
+      }
     },
     "Minimum Requirement" : {
       "comment" : "Minimum app version",
@@ -5697,6 +5741,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Biệt danh (Tùy chọn)"
+          }
+        }
+      }
+    },
+    "No Apps" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không có ứng dụng nào"
           }
         }
       }
@@ -9257,6 +9312,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "File plist này không có mục nào cả"
+          }
+        }
+      }
+    },
+    "This will keep the app running even when you close it, helpful with download or installing ipa." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật sẽ giúp cho ứng dụng chạy nền khi bạn đóng ứng dụng, hữu ích khi tải hoặc cài app"
           }
         }
       }

@@ -18,7 +18,7 @@ struct AppFeaturesView: View {
                     Label(.localized("Keep app running in background"), systemImage: "arrow.trianglehead.2.clockwise")
                 }
             } footer: {
-                Text(.localized("This will keep the app running even when you close it, helpful with download or installing ipa (require inter-app audio entilements)."))
+                Text(.localized("This will keep the app running even when you close it, helpful with download or installing ipa."))
             }
         }
     }
