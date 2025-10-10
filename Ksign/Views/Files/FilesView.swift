@@ -26,6 +26,7 @@ struct FilesView: View {
 
     @State private var plistFileURL: URL?
     @State private var hexEditorFileURL: URL?
+    @State private var textEditorFileURL: URL?
     @State private var moveSingleFile: FileItem?
     @State private var showFilePreview = false
     @State private var previewFile: FileItem?
@@ -150,6 +151,9 @@ struct FilesView: View {
         .fullScreenCover(item: $hexEditorFileURL) { fileURL in
             HexEditorView(fileURL: fileURL)
         }
+        .fullScreenCover(item: $textEditorFileURL) { fileURL in
+            TextEditorView(fileURL: fileURL)
+        }
         .alert(String(localized: "New Folder"), isPresented: $viewModel.showingNewFolderDialog) {
             TextField(String(localized: "Folder name"), text: $viewModel.newFolderName)
                 .autocapitalization(.words)
@@ -237,6 +241,7 @@ struct FilesView: View {
                     viewModel: viewModel,
                     plistFileURL: $plistFileURL,
                     hexEditorFileURL: $hexEditorFileURL,
+                    textEditorFileURL: $textEditorFileURL,
                     shareItems: $shareItems,
                     moveFileItem: $moveSingleFile,
                     onExtractArchive: extractArchive,

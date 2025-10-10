@@ -15,6 +15,7 @@ struct FileRow: View {
     @Binding var hexEditorFileURL: URL?
     @Binding var shareItems: [Any]
     @Binding var moveFileItem: FileItem?
+    @Binding var textEditorFileURL: URL?
     
     let onExtractArchive: (FileItem) -> Void
     let onPackageApp: (FileItem) -> Void
@@ -28,6 +29,7 @@ struct FileRow: View {
         viewModel: FilesViewModel,
         plistFileURL: Binding<URL?>,
         hexEditorFileURL: Binding<URL?>,
+        textEditorFileURL: Binding<URL?>,
         shareItems: Binding<[Any]>,
         moveFileItem: Binding<FileItem?>,
         onExtractArchive: @escaping (FileItem) -> Void,
@@ -41,6 +43,7 @@ struct FileRow: View {
         self.viewModel = viewModel
         self._plistFileURL = plistFileURL
         self._hexEditorFileURL = hexEditorFileURL
+        self._textEditorFileURL = textEditorFileURL
         self._shareItems = shareItems
         self._moveFileItem = moveFileItem
         self.onExtractArchive = onExtractArchive
@@ -174,6 +177,14 @@ struct FileRow: View {
                 onPresentQuickLook(file)
             } label: {
                 Label(String(localized: "Preview"), systemImage: "eye")
+            }
+        }
+        
+        if file.isTextFile {
+            Button {
+                textEditorFileURL = file.url
+            } label: {
+                Label(String(localized: "Text Editor"), systemImage: "doc.plaintext")
             }
         }
         
