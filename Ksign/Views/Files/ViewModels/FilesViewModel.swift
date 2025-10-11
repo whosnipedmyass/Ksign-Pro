@@ -16,23 +16,13 @@ import Zsign
 
 class FilesViewModel: ObservableObject {
     @Published var files: [FileItem] = []
-    @Published var isLoading = false
     @Published var currentDirectory: URL
     @Published var selectedItems: Set<FileItem> = []
     @Published var isEditMode: EditMode = .inactive
-    @Published var error: String?
-    @Published var showingError = false
-    @Published var showingNewFolderDialog = false
     @Published var showingImporter = false
-    @Published var showRenameDialog = false
-    @Published var itemToRename: FileItem?
-    @Published var newFileName = ""
-    @Published var showActionSheet = false
     @Published var selectedItem: FileItem?
     @Published var showDirectoryPicker = false
-    @Published var selectedDestinationDirectory: URL?
     
-
     
     init(directory: URL? = nil) {
         if let directory = directory {
@@ -45,7 +35,6 @@ class FilesViewModel: ObservableObject {
     }
     
     func loadFiles() {
-        isLoading = true
         let fileManager = FileManager.default
         
         do {
@@ -70,12 +59,10 @@ class FilesViewModel: ObservableObject {
                     return nil
                 }
             }.sorted { $0.name.lowercased() < $1.name.lowercased() }
-            
-            isLoading = false
         } catch {
-            isLoading = false
-            self.error = "Error loading files: \(error.localizedDescription)"
-            self.showingError = true
+            DispatchQueue.main.async {
+                UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Error loading files: \(error.localizedDescription)"))
+            }
         }
     }
     
@@ -124,8 +111,7 @@ class FilesViewModel: ObservableObject {
             DispatchQueue.main.async {
                 if !errorMessages.isEmpty {
                     let count = errorMessages.count
-                    self.error = "Failed to delete \(count) item\(count == 1 ? "" : "s")"
-                    self.showingError = true
+                    UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Failed to delete \(count) item\(count == 1 ? "" : "s")"))
                 }
             }
         }
@@ -143,8 +129,9 @@ class FilesViewModel: ObservableObject {
                 loadFiles()
             }
         } catch {
-            self.error = "Error creating folder: \(error.localizedDescription)"
-            self.showingError = true
+            DispatchQueue.main.async {
+                UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Error creating folder: \(error.localizedDescription)"))
+            }
         }
     }
     
@@ -162,7 +149,9 @@ class FilesViewModel: ObservableObject {
                 loadFiles()
             }       
         } catch {
-            
+            DispatchQueue.main.async {
+                UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Error creating text file: \(error.localizedDescription)"))
+            }
         }
     }
     
@@ -178,8 +167,9 @@ class FilesViewModel: ObservableObject {
                 loadFiles()
             }
         } catch {
-            self.error = "Error renaming file: \(error.localizedDescription)"
-            self.showingError = true
+            DispatchQueue.main.async {
+                UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Error renaming file: \(error.localizedDescription)"))
+            }
         }
     }
     
@@ -190,7 +180,7 @@ class FilesViewModel: ObservableObject {
         let provisionFile = CertificateService.shared.findProvisionFile(near: file)
         switch provisionFile {
         case .failure(let err):
-            DispatchQueue.main.async { UIAlertController.showAlertWithOk(title: .localized("Error"), message: err.errorDescription ?? "Unknown error") }
+            DispatchQueue.main.async { UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized(err.errorDescription ?? "Unknown error")) }
         case .success(let provisionFile):
             CertificateService.shared.importP12Certificate(p12File: file, provisionFile: provisionFile, password: "") { [weak self] result in
                 DispatchQueue.main.async {
@@ -273,8 +263,7 @@ class FilesViewModel: ObservableObject {
             
             DispatchQueue.main.async {
                 if failureCount > 0 {
-                    self.error = "Failed to import \(failureCount) file\(failureCount == 1 ? "" : "s")"
-                    self.showingError = true
+                    UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Failed to import \(failureCount) file\(failureCount == 1 ? "" : "s")"))
                 }
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     self.loadFiles()
@@ -347,13 +336,11 @@ class FilesViewModel: ObservableObject {
                         self?.loadFiles()
                     }
                     
-                    self?.error = "File extracted successfully"
-                    self?.showingError = true
+                    UIAlertController.showAlertWithOk(title: .localized("Success"), message: .localized("File extracted successfully"))
                     
                 case .failure(let error):
                     NotificationCenter.default.post(name: NSNotification.Name("ExtractionFailed"), object: nil)
-                    self?.error = "Error extracting archive: \(error.localizedDescription)"
-                    self?.showingError = true
+                    UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Error extracting archive: \(error.localizedDescription)"))
                 }
             }
         }
@@ -370,13 +357,11 @@ class FilesViewModel: ObservableObject {
                 case .success(let ipaFileName):
                     NotificationCenter.default.post(name: NSNotification.Name("ExtractionCompleted"), object: nil)
                     self?.loadFiles()
-                    self?.error = "Successfully packaged \(file.name) as \(ipaFileName)"
-                    self?.showingError = true
+                    UIAlertController.showAlertWithOk(title: .localized("Success"), message: .localized("Successfully packaged \(file.name) as \(ipaFileName)"))
                     
                 case .failure(let error):
                     NotificationCenter.default.post(name: NSNotification.Name("ExtractionFailed"), object: nil)
-                    self?.error = "Failed to package IPA: \(error.localizedDescription)"
-                    self?.showingError = true
+                    UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Failed to package IPA: \(error.localizedDescription)"))
                 }
             }
         }

@@ -13,14 +13,14 @@ struct FileRow: View {
     @ObservedObject var viewModel: FilesViewModel
     @Binding var plistFileURL: URL?
     @Binding var hexEditorFileURL: URL?
+    @Binding var quickLookFileURL: URL?
+    @Binding var textEditorFileURL: URL?
     @Binding var shareItems: [Any]
     @Binding var moveFileItem: FileItem?
-    @Binding var textEditorFileURL: URL?
     
     let onExtractArchive: (FileItem) -> Void
     let onPackageApp: (FileItem) -> Void
     let onImportIpa: (FileItem) -> Void
-    let onPresentQuickLook: (FileItem) -> Void
     let onNavigateToDirectory: ((URL) -> Void)?
     
     init(
@@ -30,12 +30,12 @@ struct FileRow: View {
         plistFileURL: Binding<URL?>,
         hexEditorFileURL: Binding<URL?>,
         textEditorFileURL: Binding<URL?>,
+        quickLookFileURL: Binding<URL?>,
         shareItems: Binding<[Any]>,
         moveFileItem: Binding<FileItem?>,
         onExtractArchive: @escaping (FileItem) -> Void,
         onPackageApp: @escaping (FileItem) -> Void,
         onImportIpa: @escaping (FileItem) -> Void,
-        onPresentQuickLook: @escaping (FileItem) -> Void,
         onNavigateToDirectory: ((URL) -> Void)? = nil
     ) {
         self.file = file
@@ -44,12 +44,12 @@ struct FileRow: View {
         self._plistFileURL = plistFileURL
         self._hexEditorFileURL = hexEditorFileURL
         self._textEditorFileURL = textEditorFileURL
+        self._quickLookFileURL = quickLookFileURL
         self._shareItems = shareItems
         self._moveFileItem = moveFileItem
         self.onExtractArchive = onExtractArchive
         self.onPackageApp = onPackageApp
         self.onImportIpa = onImportIpa
-        self.onPresentQuickLook = onPresentQuickLook
         self.onNavigateToDirectory = onNavigateToDirectory
     }
     
@@ -174,7 +174,7 @@ struct FileRow: View {
     private func fileConfirmationDialogButtons() -> some View {
         if !file.isDirectory {
             Button {
-                onPresentQuickLook(file)
+                quickLookFileURL = file.url
             } label: {
                 Label(String(localized: "Preview"), systemImage: "eye")
             }

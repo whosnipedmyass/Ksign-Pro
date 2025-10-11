@@ -17,19 +17,19 @@ extension URL: Identifiable {
 struct FilesView: View {
     let directoryURL: URL?
     let isRootView: Bool
+    @Namespace private var _namespace
     
     @StateObject private var viewModel: FilesViewModel
     @StateObject private var downloadManager = DownloadManager.shared
     @State private var searchText = ""
-    @Namespace private var animation
+
     @AppStorage("Feather.useLastExportLocation") private var _useLastExportLocation: Bool = false
 
     @State private var plistFileURL: URL?
     @State private var hexEditorFileURL: URL?
     @State private var textEditorFileURL: URL?
+    @State private var quickLookFileURL: URL?
     @State private var moveSingleFile: FileItem?
-    @State private var showFilePreview = false
-    @State private var previewFile: FileItem?
     @State private var shareItems: [Any] = []
     @State private var navigateToDirectoryURL: URL?
     
@@ -147,12 +147,19 @@ struct FilesView: View {
 
         .fullScreenCover(item: $plistFileURL) { fileURL in
             PlistEditorView(fileURL: fileURL)
+                .compatNavigationTransition(id: fileURL.absoluteString, ns: _namespace)
         }
         .fullScreenCover(item: $hexEditorFileURL) { fileURL in
             HexEditorView(fileURL: fileURL)
+                .compatNavigationTransition(id: fileURL.absoluteString, ns: _namespace)
         }
         .fullScreenCover(item: $textEditorFileURL) { fileURL in
             TextEditorView(fileURL: fileURL)
+                .compatNavigationTransition(id: fileURL.absoluteString, ns: _namespace)
+        }
+        .fullScreenCover(item: $quickLookFileURL) { fileURL in
+            QuickLookPreview(fileURL: fileURL)
+                .compatNavigationTransition(id: fileURL.absoluteString, ns: _namespace)
         }
     }
     
@@ -160,15 +167,42 @@ struct FilesView: View {
     
     @ViewBuilder
     private var contentView: some View {
-        Group {
-            if viewModel.isLoading {
-                loadingView
-            } else {
-                fileListView
+        List {
+            ForEach(filteredFiles) { file in
+                FileRow(
+                    file: file,
+                    isSelected: viewModel.selectedItems.contains(file),
+                    viewModel: viewModel,
+                    plistFileURL: $plistFileURL,
+                    hexEditorFileURL: $hexEditorFileURL,
+                    textEditorFileURL: $textEditorFileURL,
+                    quickLookFileURL: $quickLookFileURL,
+                    shareItems: $shareItems,
+                    moveFileItem: $moveSingleFile,
+                    onExtractArchive: extractArchive,
+                    onPackageApp: packageAppAsIPA,
+                    onImportIpa: importIpaToLibrary,
+                    onNavigateToDirectory: navigateToDirectory
+                )
+                .swipeActions(edge: .trailing) {
+                    swipeActions(for: file)
+                }
+                .listRowBackground(selectionBackground(for: file))
+                .compatMatchedTransitionSource(id: file.url.absoluteString, ns: _namespace)
+            }
+        }
+        .listStyle(.plain)
+        .environment(\.editMode, $viewModel.isEditMode)
+        .navigationDestination(isPresented: Binding(
+            get: { navigateToDirectoryURL != nil },
+            set: { if !$0 { navigateToDirectoryURL = nil } }
+        )) {
+            if let url = navigateToDirectoryURL {
+                FilesView(directoryURL: url)
             }
         }
         .overlay {
-            if filteredFiles.isEmpty && !viewModel.isLoading {
+            if filteredFiles.isEmpty {
                 if #available(iOS 17, *) {
                     ContentUnavailableView {
                         Label(.localized("No Files"), systemImage: "folder.fill.badge.questionmark")
@@ -182,49 +216,6 @@ struct FilesView: View {
                         }
                     }
                 }
-            }
-        }
-    }
-    
-    private var loadingView: some View {
-        ProgressView()
-            .scaleEffect(1.5)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
-    private var fileListView: some View {
-        List {
-            ForEach(filteredFiles) { file in
-                FileRow(
-                    file: file,
-                    isSelected: viewModel.selectedItems.contains(file),
-                    viewModel: viewModel,
-                    plistFileURL: $plistFileURL,
-                    hexEditorFileURL: $hexEditorFileURL,
-                    textEditorFileURL: $textEditorFileURL,
-                    shareItems: $shareItems,
-                    moveFileItem: $moveSingleFile,
-                    onExtractArchive: extractArchive,
-                    onPackageApp: packageAppAsIPA,
-                    onImportIpa: importIpaToLibrary,
-                    onPresentQuickLook: presentQuickLook,
-                    onNavigateToDirectory: navigateToDirectory
-                )
-                .swipeActions(edge: .trailing) {
-                    swipeActions(for: file)
-                }
-                .listRowBackground(selectionBackground(for: file))
-                
-            }
-        }
-        .listStyle(.plain)
-        .environment(\.editMode, $viewModel.isEditMode)
-        .navigationDestination(isPresented: Binding(
-            get: { navigateToDirectoryURL != nil },
-            set: { if !$0 { navigateToDirectoryURL = nil } }
-        )) {
-            if let url = navigateToDirectoryURL {
-                FilesView(directoryURL: url)
             }
         }
     }
@@ -433,11 +424,7 @@ struct FilesView: View {
             }
         }
     }
-    
-    private func presentQuickLook(for file: FileItem) {
-        let previewController = QuickLookController.shared
-        previewController.previewFile(file.url)
-    }
+
     
     // MARK: - UI Helpers
     
