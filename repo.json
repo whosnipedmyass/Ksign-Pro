@@ -3,7 +3,7 @@
     "identifier": "nya.asami.ksign-repo",
     "subtitle": "A source for Ksign app",
     "description": "This is a AltStore source for Ksign",
-    "iconURL": "https://github.com/Nyasami/Ksign/blob/v1.4.1/Ksign/Resources/AppIcons/kana_peek.png?raw=true",
+    "iconURL": "https://github.com/Nyasami/Ksign/blob/v1.5/Ksign/Resources/AppIcons/kana_peek.png?raw=true",
     "website": "https://github.com/Nyasami/Ksign",
     "tintColor": "3c94fc",
     "apps": [
@@ -11,12 +11,21 @@
             "name": "Ksign",
             "bundleIdentifier": "nya.asami.ksign",
             "developerName": "Nagata Asami",
-            "iconURL": "https://github.com/Nyasami/Ksign/blob/v1.4.1/Ksign/Resources/Assets.xcassets/AppIcon.appiconset/Ksign-default.png?raw=true",
+            "iconURL": "https://github.com/Nyasami/Ksign/blob/v1.5/Ksign/Resources/Assets.xcassets/AppIcon.appiconset/Ksign-default.png?raw=true",
             "localizedDescription": "Yet another codesigning app, have you ever wondered what if Feather and Esign had a child? Welcome to Ksign!",
             "subtitle": "The \"cleaner\" Esign app.",
             "tintColor": "3c94fc",
             "category": "utilities",
             "versions": [
+                {
+                    "downloadURL": "https://github.com/Nyasami/Ksign/releases/download/v1.5/Ksign.ipa",
+                    "size": 14000000,
+                    "version": "1.5",
+                    "buildVersion": "1",
+                    "date": "2025-10-12T01:41:00+07:00",
+                    "localizedDescription": "Hawwo everywan! the next big update is here! thank you for all your feature requests and bug reports!\n\nThis version introduces:\n\n- Bulk Signing (select multiple apps and click on the sign icon)\n- App can be run in background finally! (helpful with downloading ipas and installing them) \n- Logs tab so you can see what's going on under the hood\n- Added experiments signing option from Feather\n- Reset cache and storage in reset tab\n- Ability to bundle default certificate with app\n- Ability to edit text files and make a new one in file manager\n- A few small UI changes",
+                    "minOSVersion": "16.0"
+                },
                 {
                     "downloadURL": "https://github.com/Nyasami/Ksign/releases/download/v1.4.1/Ksign.ipa",
                     "size": 14000000,
@@ -48,7 +57,7 @@
             "appPermissions": {},
             "version": "1.3.2",
             "versionDate": "2025-07-28T14:04:00+07:00",
-            "size": 14700000,
+            "size": 13400000,
             "downloadURL": "https://github.com/Nyasami/Ksign/releases/download/v1.3.2/Ksign.ipa"
         }
     ]
