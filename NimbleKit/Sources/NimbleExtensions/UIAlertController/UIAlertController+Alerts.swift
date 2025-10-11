@@ -137,4 +137,41 @@ extension UIAlertController {
 		
 		presenter.present(alert, animated: true)
 	}
+
+    static public func showAlertWithTextBox(
+        _ presenter: UIViewController = UIApplication.topViewController()!,
+        _ popoverFromView: UIView? = nil,
+        title: String?,
+        message: String?,
+        textFieldPlaceholder: String?,
+		textFieldText: String = "",
+        submit: String?,	
+        cancel: String?,
+        style: UIAlertController.Style = .alert,
+        onSubmit: @escaping (String) -> Void
+    ) {
+        let alert = Self(title: title, message: message, preferredStyle: style)
+        alert.addTextField { textField in
+            textField.placeholder = textFieldPlaceholder
+            textField.text = textFieldText
+        }
+        let cancel = UIAlertAction(title: cancel, style: .cancel, handler: nil)
+        let submit = UIAlertAction(title: submit, style: .default) { _ in
+            let text = alert.textFields?.first?.text ?? ""
+            onSubmit(text)
+        }
+        alert.addAction(cancel)
+        alert.addAction(submit)
+        
+        if
+            style == .actionSheet,
+            let popover = alert.popoverPresentationController,
+            let view = popoverFromView
+        {
+            popover.sourceView = view
+            popover.sourceRect = view.bounds
+            popover.permittedArrowDirections = .any
+        }
+        presenter.present(alert, animated: true)
+    }
 }

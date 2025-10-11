@@ -154,46 +154,6 @@ struct FilesView: View {
         .fullScreenCover(item: $textEditorFileURL) { fileURL in
             TextEditorView(fileURL: fileURL)
         }
-        .alert(String(localized: "New Folder"), isPresented: $viewModel.showingNewFolderDialog) {
-            TextField(String(localized: "Folder name"), text: $viewModel.newFolderName)
-                .autocapitalization(.words)
-                .disableAutocorrection(true)
-            Button(String(localized: "Cancel"), role: .cancel) { viewModel.newFolderName = "" }
-            Button(String(localized: "Create")) { viewModel.createNewFolder() }
-        } message: {
-            Text(String(localized: "Enter a name for the new folder"))
-        }
-        .alert(String(localized: "Rename File"), isPresented: $viewModel.showRenameDialog) {
-            TextField(String(localized: "File name"), text: $viewModel.newFileName)
-                .disableAutocorrection(true)
-            Button(String(localized: "Cancel"), role: .cancel) { 
-                viewModel.itemToRename = nil
-                viewModel.newFileName = "" 
-            }
-            Button(String(localized: "Rename")) { viewModel.renameFile() }
-        } message: {
-            Text(String(localized: "Enter a new name"))
-        }
-        .alert(isPresented: $viewModel.showingError) {
-            Alert(
-                title: Text(String(localized: "Alert")),
-                message: Text(viewModel.error ?? String(localized: "An unknown error occurred")),
-                dismissButton: .default(Text(String(localized: "OK")))
-            )
-        }
-        .alert(String(localized: "Enter Certificate Password"), isPresented: $viewModel.showPasswordAlert) {
-            TextField(String(localized: "Password (leave empty if none)"), text: $viewModel.certificatePassword)
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-            Button(String(localized: "Cancel"), role: .cancel) { 
-                viewModel.selectedP12File = nil
-                viewModel.selectedProvisionFile = nil
-                viewModel.certificatePassword = ""
-            }
-            Button(String(localized: "Import")) { viewModel.completeCertificateImport() }
-        } message: {
-            Text(String(localized: "Enter the password for the certificate. Leave it blank if no password is required."))
-        }
     }
     
     // MARK: - Content Views
@@ -298,9 +258,33 @@ struct FilesView: View {
                 Label(String(localized: "Import Files"), systemImage: "doc.badge.plus")
             }
             Button {
-                viewModel.showingNewFolderDialog = true
+                UIAlertController.showAlertWithTextBox(
+                    title: .localized("New Folder"),
+                    message: .localized("Enter a name for the new folder"),
+                    textFieldPlaceholder: .localized("Folder name"),
+                    submit: .localized("Create"),
+                    cancel: .localized("Cancel"),
+                    onSubmit: { name in
+                        viewModel.createNewFolder(name: name)
+                    }
+                )
             } label: {
                 Label(String(localized: "New Folder"), systemImage: "folder.badge.plus")
+            }
+            Button {
+                UIAlertController.showAlertWithTextBox(
+                    title: .localized("New Text File"),
+                    message: .localized("Enter a name for the new text file"),
+                    textFieldPlaceholder: .localized("Text file name"),
+                    textFieldText: "Unnamed.txt",
+                    submit: .localized("Create"),
+                    cancel: .localized("Cancel"),
+                    onSubmit: { name in
+                       viewModel.createNewTextFile(name: name)
+                    }
+                )
+            } label: {
+                Label(String(localized: "New Text File"), systemImage: "doc.badge.plus")
             }
         } label: {
             Image(systemName: "plus")
@@ -400,8 +384,7 @@ struct FilesView: View {
                     }
                     
                 case .failure:
-                    self.viewModel.error = String(localized: "Whoops!, something went wrong when extracting the file. \nMaybe try switching the extraction library in the settings?")
-                    self.viewModel.showingError = true
+                    UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Whoops!, something went wrong when extracting the file. \nMaybe try switching the extraction library in the settings?"))
                 }
                 ExtractManager.shared.finish(item: extractItem)
             }
@@ -426,12 +409,9 @@ struct FilesView: View {
                 switch result {
                 case .success(let ipaFileName):
                     self.viewModel.loadFiles()
-                    self.viewModel.error = String(localized: "Successfully packaged \(file.name) as \(ipaFileName)")
-                    self.viewModel.showingError = true
-                    
+                    UIAlertController.showAlertWithOk(title: .localized("Success"), message: .localized("Successfully packaged \(file.name) as \(ipaFileName)"))
                 case .failure(let error):
-                    self.viewModel.error = String(localized: "Failed to package IPA: \(error.localizedDescription)")
-                    self.viewModel.showingError = true
+                    UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Failed to package IPA: \(error.localizedDescription)"))
                 }
                 ExtractManager.shared.finish(item: extractItem)
             }
@@ -444,8 +424,7 @@ struct FilesView: View {
         downloadManager.handlePachageFile(url: file.url, dl: download) { err in
             DispatchQueue.main.async {
                 if let error = err {
-                    self.viewModel.error = String(localized: "Whoops!, something went wrong when extracting the file. \nMaybe try switching the extraction library in the settings?")
-                    self.viewModel.showingError = true
+                    UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized("Whoops!, something went wrong when extracting the file. \nMaybe try switching the extraction library in the settings?"))
                 } else {
                 }
                 if let index = DownloadManager.shared.getDownloadIndex(by: download.id) {

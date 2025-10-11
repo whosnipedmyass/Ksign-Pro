@@ -57,31 +57,18 @@ final class CertificateService {
     
     // MARK: - Public Methods
     
-    func importP12Certificate(from file: FileItem, completion: @escaping (ImportResult) -> Void) {
-        guard file.isP12Certificate else {
-            completion(.failure(.invalidFile))
-            return
-        }
-        
-        let directory = file.url.deletingLastPathComponent()
+    /// Finds the first (and only) .mobileprovision file in the same directory as the given .p12
+    func findProvisionFile(near p12File: FileItem) -> Result<FileItem, ImportError> {
+        guard p12File.isP12Certificate else { return .failure(.invalidFile) }
+        let directory = p12File.url.deletingLastPathComponent()
         let fileManager = FileManager.default
-        
         do {
             let directoryContents = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
             let provisionFiles = directoryContents.filter { url in
                 url.pathExtension.lowercased() == "mobileprovision"
             }
-            
-            if provisionFiles.isEmpty {
-                completion(.failure(.noProvisionFile))
-                return
-            }
-            
-            if provisionFiles.count > 1 {
-                completion(.failure(.multipleProvisionFiles))
-                return
-            }
-            
+            if provisionFiles.isEmpty { return .failure(.noProvisionFile) }
+            if provisionFiles.count > 1 { return .failure(.multipleProvisionFiles) }
             let provisionURL = provisionFiles[0]
             let resourceValues = try provisionURL.resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .isDirectoryKey])
             let provisionFile = FileItem(
@@ -91,12 +78,9 @@ final class CertificateService {
                 creationDate: resourceValues.creationDate,
                 isDirectory: resourceValues.isDirectory ?? false
             )
-            
-            // Import with password prompt
-            importP12Certificate(p12File: file, provisionFile: provisionFile, password: "", completion: completion)
-            
+            return .success(provisionFile)
         } catch {
-            completion(.failure(.importFailed(error.localizedDescription)))
+            return .failure(.importFailed(error.localizedDescription))
         }
     }
     

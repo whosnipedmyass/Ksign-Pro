@@ -23,17 +23,12 @@ class FilesViewModel: ObservableObject {
     @Published var error: String?
     @Published var showingError = false
     @Published var showingNewFolderDialog = false
-    @Published var newFolderName = ""
     @Published var showingImporter = false
     @Published var showRenameDialog = false
     @Published var itemToRename: FileItem?
     @Published var newFileName = ""
     @Published var showActionSheet = false
     @Published var selectedItem: FileItem?
-    @Published var showPasswordAlert = false
-    @Published var certificatePassword = ""
-    @Published var selectedP12File: FileItem?
-    @Published var selectedProvisionFile: FileItem?
     @Published var showDirectoryPicker = false
     @Published var selectedDestinationDirectory: URL?
     
@@ -136,15 +131,14 @@ class FilesViewModel: ObservableObject {
         }
     }
     
-    func createNewFolder() {
-        guard !newFolderName.isEmpty else { return }
+    func createNewFolder(name: String) {
+        guard !name.isEmpty else { return }
         
-        let sanitizedName = sanitizeFileName(newFolderName)
+        let sanitizedName = sanitizeFileName(name)
         let newFolderURL = currentDirectory.appendingPathComponent(sanitizedName)
         
         do {
             try FileManager.default.createDirectory(at: newFolderURL, withIntermediateDirectories: true, attributes: nil)
-            newFolderName = ""
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 loadFiles()
             }
@@ -154,18 +148,32 @@ class FilesViewModel: ObservableObject {
         }
     }
     
-
-    
-    func renameFile() {
-        guard let item = itemToRename, !newFileName.isEmpty else { return }
+    func createNewTextFile(name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
         
-        let sanitizedName = sanitizeFileName(newFileName)
+        let sanitizedName = sanitizeFileName(trimmed)
+        let newURL = currentDirectory.appendingPathComponent(sanitizedName)
+        let finalURL = generateUniqueFileName(for: newURL)
+        
+        do {
+            try Data().write(to: finalURL)
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                loadFiles()
+            }       
+        } catch {
+            
+        }
+    }
+    
+    func renameFile(newName: String, item: FileItem) {
+        guard !newName.isEmpty else { return }
+        
+        let sanitizedName = sanitizeFileName(newName)
         let newURL = currentDirectory.appendingPathComponent(sanitizedName)
         
         do {
             try FileManager.default.moveItem(at: item.url, to: newURL)
-            newFileName = ""
-            itemToRename = nil
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 loadFiles()
             }
@@ -176,6 +184,65 @@ class FilesViewModel: ObservableObject {
     }
     
 
+    func importCertificate(_ file: FileItem) {
+        guard file.isP12Certificate else { return }
+        
+        let provisionFile = CertificateService.shared.findProvisionFile(near: file)
+        switch provisionFile {
+        case .failure(let err):
+            DispatchQueue.main.async { UIAlertController.showAlertWithOk(title: .localized("Error"), message: err.errorDescription ?? "Unknown error") }
+        case .success(let provisionFile):
+            CertificateService.shared.importP12Certificate(p12File: file, provisionFile: provisionFile, password: "") { [weak self] result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let message):
+                        UIAlertController.showAlertWithOk(title: .localized("Success"), message: .localized(message))
+                    case .failure(let importError):
+                        if case .invalidPassword = importError {
+                            UIAlertController.showAlertWithTextBox(
+                                title: .localized("Enter Certificate Password"),
+                                message: .localized("Enter the password for the certificate. Leave it blank if no password is required."),
+                                textFieldPlaceholder: .localized("Password"),
+                                textFieldText: "",
+                                submit: .localized("Import"),
+                                cancel: .localized("Cancel"),
+                                onSubmit: { password in
+                                    CertificateService.shared.importP12Certificate(p12File: file, provisionFile: provisionFile, password: password) { result in
+                                        DispatchQueue.main.async {
+                                            switch result {
+                                            case .success(let message):
+                                                UIAlertController.showAlertWithOk(title: .localized("Success"), message: .localized(message))
+                                            case .failure(let finalError):
+                                                UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized(finalError.localizedDescription))
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+                        } else {
+                            UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized(importError.localizedDescription))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    func importKsignFile(_ file: FileItem) {
+        guard file.isKsignFile else { return }
+        
+        CertificateService.shared.importKsignCertificate(from: file.url) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let message):
+                    UIAlertController.showAlertWithOk(title: .localized("Success"), message: .localized(message))
+                case .failure(let error):
+                    UIAlertController.showAlertWithOk(title: .localized("Error"), message: .localized(error.localizedDescription))
+                }
+            }
+        }
+    }
+    
     
     private func sanitizeFileName(_ name: String) -> String {
         let invalidCharacters = CharacterSet(charactersIn: "/:?*<>|\"\\")
@@ -263,140 +330,6 @@ class FilesViewModel: ObservableObject {
         } while fileManager.fileExists(atPath: newURL.path) && counter < 1000 // Safety limit
         
         return newURL
-    }
-    
-    func importCertificate(_ file: FileItem) {
-        guard file.isP12Certificate else { return }
-        
-        CertificateService.shared.importP12Certificate(from: file) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let message):
-                    self?.error = message
-                    self?.showingError = true
-                case .failure(let importError):
-                    if case .invalidPassword = importError {
-                        self?.selectedP12File = file
-                        self?.certificatePassword = ""
-                        self?.showPasswordAlert = true
-                    } else {
-                        self?.error = importError.localizedDescription
-                        self?.showingError = true
-                    }
-                }
-            }
-        }
-    }
-    
-    func completeCertificateImport() {
-        guard let p12File = selectedP12File else { return }
-        
-        let directory = p12File.url.deletingLastPathComponent()
-        let fileManager = FileManager.default
-        
-        do {
-            let directoryContents = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
-            let provisionFiles = directoryContents.filter { url in
-                url.pathExtension.lowercased() == "mobileprovision"
-            }
-            
-            guard let provisionURL = provisionFiles.first else {
-                self.error = "No .mobileprovision file found in the same directory"
-                self.showingError = true
-                return
-            }
-            
-            let resourceValues = try provisionURL.resourceValues(forKeys: [.fileSizeKey, .creationDateKey, .isDirectoryKey])
-            let provisionFile = FileItem(
-                name: provisionURL.lastPathComponent,
-                url: provisionURL,
-                size: Int64(resourceValues.fileSize ?? 0),
-                creationDate: resourceValues.creationDate,
-                isDirectory: resourceValues.isDirectory ?? false
-            )
-            
-            CertificateService.shared.importP12Certificate(
-                p12File: p12File,
-                provisionFile: provisionFile,
-                password: certificatePassword
-            ) { [weak self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let message):
-                        self?.error = message
-                        self?.showingError = true
-                    case .failure(let importError):
-                        self?.error = importError.localizedDescription
-                        self?.showingError = true
-                    }
-                    
-                    self?.selectedP12File = nil
-                    self?.selectedProvisionFile = nil
-                    self?.certificatePassword = ""
-                }
-            }
-            
-        } catch {
-            self.error = "Error finding provision file: \(error.localizedDescription)"
-            self.showingError = true
-        }
-    }
-    
-    func importKsignFile(_ file: FileItem) {
-        guard file.isKsignFile else { return }
-        
-        CertificateService.shared.importKsignCertificate(from: file) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let message):
-                    self?.error = message
-                    self?.showingError = true
-                case .failure(let importError):
-                    self?.error = importError.localizedDescription
-                    self?.showingError = true
-                }
-            }
-        }
-    }
-
-    
-    func moveFiles(to destinationURL: URL) {
-        let fileManager = FileManager.default
-        var successCount = 0
-        var failCount = 0
-        
-        for item in selectedItems {
-            let destinationFileURL = destinationURL.appendingPathComponent(item.name)
-            
-            do {
-                if fileManager.fileExists(atPath: destinationFileURL.path) {
-                    failCount += 1
-                    continue
-                }
-                
-                try fileManager.moveItem(at: item.url, to: destinationFileURL)
-                successCount += 1
-            } catch {
-                print("Error moving file: \(error)")
-                failCount += 1
-            }
-        }
-        
-        withAnimation {
-            selectedItems.removeAll()
-            if isEditMode == .active {
-                isEditMode = .inactive
-            }
-        }
-        
-        if failCount == 0 {
-            self.error = "Successfully moved \(successCount) items"
-        } else {
-            self.error = "Moved \(successCount) items. Failed to move \(failCount) items."
-        }
-        self.showingError = true
-        
-        loadFiles()
     }
     
     func extractArchive(_ file: FileItem) {

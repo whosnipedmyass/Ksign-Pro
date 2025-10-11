@@ -31,9 +31,17 @@ struct FileUIHelpers {
         }
         
         Button {
-            viewModel.itemToRename = file
-            viewModel.newFileName = file.name
-            viewModel.showRenameDialog = true
+            UIAlertController.showAlertWithTextBox(
+                title: .localized("Rename"),
+                message: .localized("Enter a new name"),
+                textFieldPlaceholder: .localized("File name"),
+                textFieldText: file.name,
+                submit: .localized("Rename"),
+                cancel: .localized("Cancel"),
+                onSubmit: { name in
+                    viewModel.renameFile(newName: name, item: file)
+                }
+            )
         } label: {
             Label(String(localized: "Rename"), systemImage: "pencil")
         }

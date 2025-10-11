@@ -836,6 +836,7 @@
       }
     },
     "Alert" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -1113,6 +1114,7 @@
       }
     },
     "An unknown error occurred" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -1974,6 +1976,7 @@
       }
     },
     "Create" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -2799,6 +2802,7 @@
       }
     },
     "Enter a name for the new folder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -2809,6 +2813,7 @@
       }
     },
     "Enter a new name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -2872,6 +2877,7 @@
       }
     },
     "Enter Certificate Password" : {
+      "extractionState" : "manual",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -2882,7 +2888,7 @@
       }
     },
     "Enter Password" : {
-      "extractionState" : "stale",
+      "extractionState" : "manual",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -2935,7 +2941,7 @@
       }
     },
     "Enter the password associated with the private key. Leave it blank if theres no password required." : {
-      "extractionState" : "stale",
+      "extractionState" : "manual",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -2988,6 +2994,7 @@
       }
     },
     "Enter the password for the certificate. Leave it blank if no password is required." : {
+      "extractionState" : "manual",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -3480,6 +3487,7 @@
       }
     },
     "Failed to package IPA: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -3565,6 +3573,7 @@
       }
     },
     "File name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -3735,6 +3744,7 @@
       }
     },
     "Folder name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -5218,6 +5228,9 @@
         }
       }
     },
+    "Key" : {
+      "extractionState" : "manual"
+    },
     "Library" : {
       "comment" : "Library tab",
       "extractionState" : "manual",
@@ -5681,6 +5694,16 @@
         }
       }
     },
+    "New Text File" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mục chữ mới"
+          }
+        }
+      }
+    },
     "Next" : {
       "localizations" : {
         "vi" : {
@@ -5884,6 +5907,7 @@
       }
     },
     "OK" : {
+      "extractionState" : "stale",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -6370,6 +6394,7 @@
       }
     },
     "Password (leave empty if none)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -7372,6 +7397,7 @@
       }
     },
     "Rename File" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -9026,6 +9052,7 @@
       }
     },
     "Successfully packaged %@ as %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9196,6 +9223,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tên nhóm"
+          }
+        }
+      }
+    },
+    "Text Editor" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chỉnh sửa"
           }
         }
       }
@@ -9915,6 +9952,7 @@
       }
     },
     "Whoops!, something went wrong when extracting the file. \nMaybe try switching the extraction library in the settings?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
