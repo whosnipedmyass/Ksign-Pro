@@ -66,6 +66,13 @@ struct FileItem: Identifiable, Hashable {
         let imageExtensions: Set<String> = ["png", "jpg", "jpeg", "gif", "bmp", "tiff", "heic"]
         return imageExtensions.contains(fileExtension?.lowercased() ?? "")
     }
+
+    var isTextFile: Bool {
+        guard !isDirectory else { return false }
+        let textExtensions: Set<String> = ["txt", "md", "json", "xml", "html", "css", "js", "ts", "swift", "c", "cpp", "h", "m", "mm", "py", "rb", "sh", "yml", "yaml", "plist"]
+        return textExtensions.contains(fileExtension?.lowercased() ?? "")
+    }
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(url)
     }

@@ -85,8 +85,8 @@ struct AboutNyaView: View {
 	
 	private func _showPatchNotes() {
 		UIAlertController.showAlertWithOk(
-			title: .localized("From Nyasami"),
-			message: .localized("Version 1.4.1, new app icon! Also, export/copy options and new unpackage library, check out Archive & Extraction. Happy sideloading!"),
+            title: .localized("From Nyasami, Version \(Bundle.main.version)"),
+            message: .localized("This version introduces:\n\n- Bulk Signing (select multiple apps and click on the sign icon)\n- App can be run in background finally! (helpful with downloading ipas and installing them) \n- Logs tab so you can see what's going on under the hood\n- Added experiments signing option from Feather\n- Reset cache and storage in reset tab\n- Ability to bundle default certificate with app\n- Ability to edit text files and make a new one in file manager\n- A few small UI changes"),
 			isCancel: true,
 			thankYou: true
 		)

@@ -8,6 +8,34 @@
 import UIKit.UIAlertController
 
 extension UIAlertController {
+    /// Presents an alert
+    /// - Parameters:
+    ///   - presenter: View where its presenting
+    ///   - title: Alert title
+    ///   - message: Alert message
+    ///   - actions: Alert actions
+    static public func showAlertWithCancel(
+        _ presenter: UIViewController = UIApplication.topViewController()!,
+        _ popoverFromView: UIView? = nil,
+        title: String?,
+        message: String?,
+        style: UIAlertController.Style = .alert,
+        actions: [UIAlertAction]
+    ) {
+        var actions = actions
+        actions.append(
+            UIAlertAction(title: .localized("Cancel"), style: .cancel, handler: nil)
+        )
+        
+        showAlert(
+            presenter,
+            popoverFromView,
+            title: title,
+            message: message,
+            style: style,
+            actions: actions
+        )
+    }
 	/// Presents an alert with an OK button
 	/// - Parameters:
 	///   - presenter: View where it is presenting
@@ -109,4 +137,41 @@ extension UIAlertController {
 		
 		presenter.present(alert, animated: true)
 	}
+
+    static public func showAlertWithTextBox(
+        _ presenter: UIViewController = UIApplication.topViewController()!,
+        _ popoverFromView: UIView? = nil,
+        title: String?,
+        message: String?,
+        textFieldPlaceholder: String?,
+		textFieldText: String = "",
+        submit: String?,	
+        cancel: String?,
+        style: UIAlertController.Style = .alert,
+        onSubmit: @escaping (String) -> Void
+    ) {
+        let alert = Self(title: title, message: message, preferredStyle: style)
+        alert.addTextField { textField in
+            textField.placeholder = textFieldPlaceholder
+            textField.text = textFieldText
+        }
+        let cancel = UIAlertAction(title: cancel, style: .cancel, handler: nil)
+        let submit = UIAlertAction(title: submit, style: .default) { _ in
+            let text = alert.textFields?.first?.text ?? ""
+            onSubmit(text)
+        }
+        alert.addAction(cancel)
+        alert.addAction(submit)
+        
+        if
+            style == .actionSheet,
+            let popover = alert.popoverPresentationController,
+            let view = popoverFromView
+        {
+            popover.sourceView = view
+            popover.sourceRect = view.bounds
+            popover.permittedArrowDirections = .any
+        }
+        presenter.present(alert, animated: true)
+    }
 }

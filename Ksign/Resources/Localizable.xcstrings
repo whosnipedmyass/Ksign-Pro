@@ -836,6 +836,7 @@
       }
     },
     "Alert" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -1113,6 +1114,7 @@
       }
     },
     "An unknown error occurred" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -1974,6 +1976,7 @@
       }
     },
     "Create" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -2799,6 +2802,7 @@
       }
     },
     "Enter a name for the new folder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -2809,6 +2813,7 @@
       }
     },
     "Enter a new name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -2872,6 +2877,7 @@
       }
     },
     "Enter Certificate Password" : {
+      "extractionState" : "manual",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -2882,7 +2888,7 @@
       }
     },
     "Enter Password" : {
-      "extractionState" : "stale",
+      "extractionState" : "manual",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -2935,7 +2941,7 @@
       }
     },
     "Enter the password associated with the private key. Leave it blank if theres no password required." : {
-      "extractionState" : "stale",
+      "extractionState" : "manual",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -2988,6 +2994,7 @@
       }
     },
     "Enter the password for the certificate. Leave it blank if no password is required." : {
+      "extractionState" : "manual",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -3480,6 +3487,7 @@
       }
     },
     "Failed to package IPA: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -3565,6 +3573,7 @@
       }
     },
     "File name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -3735,6 +3744,7 @@
       }
     },
     "Folder name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -4009,6 +4019,17 @@
         }
       }
     },
+    "Get" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhận"
+          }
+        }
+      }
+    },
     "Get access to our secret Discord by donating, where we talk about future updates, betas, and potential ways to make your experience better." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4112,6 +4133,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Xem thông tin"
+          }
+        }
+      }
+    },
+    "Get started by importing your first IPA files." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bắt đầu bằng cách nhập IPA đầu tiên của bạn."
           }
         }
       }
@@ -5185,6 +5217,20 @@
         }
       }
     },
+    "Keep app running in background" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cho phép chạy nền"
+          }
+        }
+      }
+    },
+    "Key" : {
+      "extractionState" : "manual"
+    },
     "Library" : {
       "comment" : "Library tab",
       "extractionState" : "manual",
@@ -5297,6 +5343,17 @@
     },
     "Loading plist..." : {
 
+    },
+    "Logs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nhật ký"
+          }
+        }
+      }
     },
     "Minimum Requirement" : {
       "comment" : "Minimum app version",
@@ -5637,6 +5694,16 @@
         }
       }
     },
+    "New Text File" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mục chữ mới"
+          }
+        }
+      }
+    },
     "Next" : {
       "localizations" : {
         "vi" : {
@@ -5697,6 +5764,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Biệt danh (Tùy chọn)"
+          }
+        }
+      }
+    },
+    "No Apps" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không có ứng dụng nào"
           }
         }
       }
@@ -5829,6 +5907,7 @@
       }
     },
     "OK" : {
+      "extractionState" : "stale",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -6315,6 +6394,7 @@
       }
     },
     "Password (leave empty if none)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -7317,6 +7397,7 @@
       }
     },
     "Rename File" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {
@@ -8971,6 +9052,7 @@
       }
     },
     "Successfully packaged %@ as %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -9145,6 +9227,16 @@
         }
       }
     },
+    "Text Editor" : {
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chỉnh sửa"
+          }
+        }
+      }
+    },
     "The heartbeat is activated in the background, it will restart when the app is re-opened or prompted. If the status below is pulsing, that means its healthy." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9257,6 +9349,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "File plist này không có mục nào cả"
+          }
+        }
+      }
+    },
+    "This will keep the app running even when you close it, helpful with download or installing ipa." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bật sẽ giúp cho ứng dụng chạy nền khi bạn đóng ứng dụng, hữu ích khi tải hoặc cài app"
           }
         }
       }
@@ -9849,6 +9952,7 @@
       }
     },
     "Whoops!, something went wrong when extracting the file. \nMaybe try switching the extraction library in the settings?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "vi" : {
           "stringUnit" : {

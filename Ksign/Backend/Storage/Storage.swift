@@ -50,4 +50,9 @@ final class Storage: ObservableObject {
 			print("clear: \(error.localizedDescription)")
 		}
 	}
+    
+    func countContent<T: NSManagedObject>(for type: T.Type) -> String {
+        let request = T.fetchRequest()
+        return "\((try? context.count(for: request)) ?? 0)"
+    }
 }

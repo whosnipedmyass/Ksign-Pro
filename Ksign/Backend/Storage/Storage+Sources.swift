@@ -100,7 +100,6 @@ extension Storage {
 			"https://repository.apptesters.org",
             "https://raw.githubusercontent.com/LiveContainer/LiveContainer/refs/heads/main/apps.json",
 			"https://ipa.cypwn.xyz/cypwn.json",
-			"https://repo.ethsign.fyi",
             "https://alt.crystall1ne.dev"
 		]
 		

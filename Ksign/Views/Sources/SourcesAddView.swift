@@ -36,6 +36,7 @@ struct SourcesAddView: View {
 					Button(.localized("Import"), systemImage: "square.and.arrow.down") {
 						_isImporting = true
 						_addCode(UIPasteboard.general.string) {
+							UINotificationFeedbackGenerator().notificationOccurred(.success)
 							dismiss()
 						}
 						
@@ -45,6 +46,8 @@ struct SourcesAddView: View {
 						UIPasteboard.general.string = Storage.shared.getSources().map {
 							$0.sourceURL!.absoluteString
 						}.joined(separator: "\n")
+						UINotificationFeedbackGenerator().notificationOccurred(.success)
+						UIAlertController.showAlertWithOk(title: .localized("Success"), message: .localized("All sources copied to clipboard."))
 					}
 				} footer: {
 					Text(.localized("Supports importing from KravaSign/MapleSign and ESign"))

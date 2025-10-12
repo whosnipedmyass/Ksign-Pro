@@ -31,29 +31,23 @@ struct FileUIHelpers {
         }
         
         Button {
-            viewModel.itemToRename = file
-            viewModel.newFileName = file.name
-            viewModel.showRenameDialog = true
+            UIAlertController.showAlertWithTextBox(
+                title: .localized("Rename"),
+                message: .localized("Enter a new name"),
+                textFieldPlaceholder: .localized("File name"),
+                textFieldText: file.name,
+                submit: .localized("Rename"),
+                cancel: .localized("Cancel"),
+                onSubmit: { name in
+                    viewModel.renameFile(newName: name, item: file)
+                }
+            )
         } label: {
             Label(String(localized: "Rename"), systemImage: "pencil")
         }
         .tint(.blue)
     }
     
-    // MARK: - File Sharing
-    
-    static func shareFile(_ file: FileItem, shareItems: Binding<[Any]>, showingShareSheet: Binding<Bool>) {
-        let didStartAccessing = file.url.startAccessingSecurityScopedResource()
-        
-        shareItems.wrappedValue = [file.url]
-        showingShareSheet.wrappedValue = true
-        
-        if didStartAccessing {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                file.url.stopAccessingSecurityScopedResource()
-            }
-        }
-    }
     
     // MARK: - File Tap Handling
     

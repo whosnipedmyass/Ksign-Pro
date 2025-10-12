@@ -13,13 +13,14 @@ struct FileRow: View {
     @ObservedObject var viewModel: FilesViewModel
     @Binding var plistFileURL: URL?
     @Binding var hexEditorFileURL: URL?
+    @Binding var quickLookFileURL: URL?
+    @Binding var textEditorFileURL: URL?
     @Binding var shareItems: [Any]
     @Binding var moveFileItem: FileItem?
     
     let onExtractArchive: (FileItem) -> Void
     let onPackageApp: (FileItem) -> Void
     let onImportIpa: (FileItem) -> Void
-    let onPresentQuickLook: (FileItem) -> Void
     let onNavigateToDirectory: ((URL) -> Void)?
     
     init(
@@ -28,12 +29,13 @@ struct FileRow: View {
         viewModel: FilesViewModel,
         plistFileURL: Binding<URL?>,
         hexEditorFileURL: Binding<URL?>,
+        textEditorFileURL: Binding<URL?>,
+        quickLookFileURL: Binding<URL?>,
         shareItems: Binding<[Any]>,
         moveFileItem: Binding<FileItem?>,
         onExtractArchive: @escaping (FileItem) -> Void,
         onPackageApp: @escaping (FileItem) -> Void,
         onImportIpa: @escaping (FileItem) -> Void,
-        onPresentQuickLook: @escaping (FileItem) -> Void,
         onNavigateToDirectory: ((URL) -> Void)? = nil
     ) {
         self.file = file
@@ -41,12 +43,13 @@ struct FileRow: View {
         self.viewModel = viewModel
         self._plistFileURL = plistFileURL
         self._hexEditorFileURL = hexEditorFileURL
+        self._textEditorFileURL = textEditorFileURL
+        self._quickLookFileURL = quickLookFileURL
         self._shareItems = shareItems
         self._moveFileItem = moveFileItem
         self.onExtractArchive = onExtractArchive
         self.onPackageApp = onPackageApp
         self.onImportIpa = onImportIpa
-        self.onPresentQuickLook = onPresentQuickLook
         self.onNavigateToDirectory = onNavigateToDirectory
     }
     
@@ -171,11 +174,18 @@ struct FileRow: View {
     private func fileConfirmationDialogButtons() -> some View {
         if !file.isDirectory {
             Button {
-                onPresentQuickLook(file)
+                quickLookFileURL = file.url
             } label: {
                 Label(String(localized: "Preview"), systemImage: "eye")
             }
-            .tint(.primary)
+        }
+        
+        if file.isTextFile {
+            Button {
+                textEditorFileURL = file.url
+            } label: {
+                Label(String(localized: "Text Editor"), systemImage: "doc.plaintext")
+            }
         }
         
         if file.isPlistFile {
@@ -184,7 +194,6 @@ struct FileRow: View {
             } label: {
                 Label(String(localized: "Plist Editor"), systemImage: "list.bullet")
             }
-            .tint(.primary)
         }
         
         if !file.isDirectory {
@@ -193,7 +202,6 @@ struct FileRow: View {
             } label: {
                 Label(String(localized: "Hex Editor"), systemImage: "doc.text")
             }
-            .tint(.primary)
         }
         
         if file.isP12Certificate {
@@ -202,7 +210,6 @@ struct FileRow: View {
             } label: {
                 Label(String(localized: "Import Certificate"), systemImage: "key")
             }
-            .tint(.primary)
         }
         
         if file.isKsignFile {
@@ -211,7 +218,6 @@ struct FileRow: View {
             } label: {
                 Label(String(localized: "Import Certificate"), systemImage: "key")
             }
-            .tint(.primary)
         }
         
         if let ext = file.fileExtension?.lowercased(), ext == "ipa" {
@@ -221,7 +227,6 @@ struct FileRow: View {
                 Text(String(localized: "Import to Library"))
                 Image(systemName: "square.grid.2x2.fill")
             }
-            .tint(.primary)
         }
         
         if let ext = file.fileExtension?.lowercased(), ext == "app" {
@@ -230,7 +235,6 @@ struct FileRow: View {
             } label: {
                 Label(String(localized: "Package as IPA"), systemImage: "doc.zipper")
             }
-            .tint(.primary)
         }
         
         if file.isArchive {
@@ -239,7 +243,6 @@ struct FileRow: View {
             } label: {
                 Label(String(localized: "Extract"), systemImage: "doc.zipper")
             }
-            .tint(.primary)
         }
 
         Button {
@@ -247,16 +250,22 @@ struct FileRow: View {
         } label: {
             Label(String(localized: "Move"), systemImage: "folder")
         }
-        .tint(.primary)
         
         Button {
-            viewModel.itemToRename = file
-            viewModel.newFileName = file.name
-            viewModel.showRenameDialog = true
+            UIAlertController.showAlertWithTextBox(
+                title: .localized("Rename"),
+                message: .localized("Enter a new name"),
+                textFieldPlaceholder: .localized("File name"),
+                textFieldText: file.name,
+                submit: .localized("Rename"),
+                cancel: .localized("Cancel"),
+                onSubmit: { name in
+                    viewModel.renameFile(newName: name, item: file)
+                }
+            )
         } label: {
             Label(String(localized: "Rename"), systemImage: "pencil")
         }
-        .tint(.primary)
         
         Button {
             shareItems = [file.url]
@@ -264,13 +273,11 @@ struct FileRow: View {
         } label: {
             Label(String(localized: "Share"), systemImage: "square.and.arrow.up")
         }
-        .tint(.primary)
         
         Button(role: .destructive) {
             viewModel.deleteFile(file)
         } label: {
             Label(String(localized: "Delete"), systemImage: "trash")
         }
-        .tint(.red)
     }
 }

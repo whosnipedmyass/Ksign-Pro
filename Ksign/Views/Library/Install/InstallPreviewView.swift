@@ -70,6 +70,12 @@ struct InstallPreviewView: View {
 		}
 		#endif
 		.onAppear(perform: _install)
+		.onAppear {
+			BackgroundAudioManager.shared.start()
+		}
+		.onDisappear {
+			BackgroundAudioManager.shared.stop()
+		}
 	}
 	
 	@ViewBuilder
