@@ -49,7 +49,7 @@ struct AboutNyaView: View {
             .listRowBackground(EmptyView())
 			
 			NBSection(.localized("Credits")) {
-				_credit(name: "Nyasami", desc: "Developer", github: "nyasami")
+				_credit(name: "whosnipedmyass", desc: "︻デ═一", github: "whosnipedmyass")
 			}
 			
 			NBSection("Special thanks!") {
